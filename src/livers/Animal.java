@@ -23,7 +23,7 @@ public abstract class Animal implements Item {
         daysOfHungry = 0;
     }
 
-    public void setDaysOfHungry() {
+    public void addDaysOfHungry() {
         daysOfHungry++;
     }
 

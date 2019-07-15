@@ -8,24 +8,22 @@ import java.util.*;
  * Created by sbt-fedorova-mav on 06.10.2017.
  */
 class Day {
-    private Cell[][] grid;
     private List<Rabbit> rabbits;
     private List<Wolf> wolfs;
     private List<Carrot> carrots;
-    private Pasha pasha;
+    private List<Pasha> pasha;
     private int size;
     private Cell[][] gridGuess;
 
-    Day(Cell[][] grid, HashMap livers) {
-        this.grid = grid;
+    Day(int size, HashMap livers) {
         this.rabbits = (List<Rabbit>) livers.get("rabbits");
         this.wolfs = (List<Wolf>) livers.get("wolfs");
         this.carrots = (List<Carrot>) livers.get("carrots");
-        this.pasha = (Pasha) livers.get("pasha");
-        this.size = grid[0].length;
+        this.pasha = (List<Pasha>) livers.get("pasha");
+        this.size = size;
         gridGuess = new Cell[size][size];
-        for (int i=0; i<size; i++) {
-            for (int j=0; j<size; j++) {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
                 gridGuess[i][j] = new Cell();
             }
         }
@@ -46,17 +44,8 @@ class Day {
         }
     }
 
-    private void stepPasha(Pasha pasha) {
-        if (pasha.daysOfHungry == pasha.daysOfHungryLive) {
-            pasha.dead();
-        }
 
-        int[] step = pasha.go(size);
-        gridGuess[step[0]][step[1]].add(pasha);
-    }
-
-
-    private void step(List<Carrot> carrots) {
+    private void save(List<Carrot> carrots) {
         for (Carrot carrot: carrots) {
             int[] step = carrot.now;
             gridGuess[step[0]][step[1]].add(carrot);
@@ -77,7 +66,7 @@ class Day {
     private void eat(List<? extends Animal> predators, List<? extends Item> meals) {
         int iterator = Math.min(meals.size(), predators.size());
         List<Item> mealsInter = new ArrayList<>();
-        for (int i=0; i<iterator; i++) {
+        for (int i=0; i < iterator; i++) {
             Item meal = meals.get(i);
             meal.dead();
             mealsInter.add(meal);
@@ -108,7 +97,7 @@ class Day {
                     eat(wolfs, rabbits);
                 } else {
                     for (Wolf wolf: wolfs) {
-                        wolf.setDaysOfHungry();
+                        wolf.addDaysOfHungry();
                     }
                 }
             } else if (areRabbits) {
@@ -116,7 +105,7 @@ class Day {
                     eat(rabbits, carrots);
                 } else {
                     for (Rabbit rabbit: rabbits) {
-                        rabbit.setDaysOfHungry();
+                        rabbit.addDaysOfHungry();
                     }
                 }
             }
@@ -124,16 +113,14 @@ class Day {
             if (wolfs.size() != 0) {
                 if (pashas.get(0).isShoot()) {
                     System.out.println("Pasha is shooting to wolf");
-                    wolfs.get(0).dead();
-                    wolfs.remove(wolfs.get(0));
+                    eat(pashas, wolfs);
                 } else  {
                     System.out.println("Pasha isn't shooting to wolf");
                 }
             } else  if (rabbits.size() != 0) {
                 if (pashas.get(0).isShoot()) {
                     System.out.println("Pasha is shooting to rabbit");
-                    rabbits.get(0).dead();
-                    rabbits.remove(rabbits.get(0));
+                    eat(pashas, rabbits);
                 } else  {
                     System.out.println("Pasha isn't shooting to rabbit");
                 }
@@ -147,21 +134,21 @@ class Day {
         return itemsNew;
     }
 
-    Cell[][] last() {
+    Cell[][] begin() {
 
         stepAnimals(rabbits);
         stepAnimals(wolfs);
-        step(carrots);
-        stepPasha(pasha);
+        stepAnimals(pasha);
+        save(carrots);
 
 
-        for (int i=0; i<size; i++) {
-            for (int j=0; j<size; j++) {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
                 if (gridGuess[i][j].getCount() > 0) {
                     List<Item> items = gridGuess[i][j].items;
                     if ((items.size() == 1) &&  !(items.get(0) instanceof Carrot))  {
                         Animal item = (Animal)items.get(0);
-                        item.setDaysOfHungry();
+                        item.addDaysOfHungry();
                     } else if (items.size() > 1) {
                         items = processItem(items);
                     }

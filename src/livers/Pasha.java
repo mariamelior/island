@@ -13,17 +13,17 @@ public class Pasha extends Animal {
     }
 
     public Pasha() {
-        super(5,3);
+        super(2,3);
     }
 
     public int[] go(int size) {
         Random r = new Random();
         int i=0;
         int j=1;
-        if (r.nextInt(10)>5) {
+        if (r.nextInt(10) > 5) {
             i=1;
         }
-        if (r.nextInt(10)>5) {
+        if (r.nextInt(10) > 5) {
             j=-1;
         }
 
